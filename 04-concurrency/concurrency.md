@@ -2,7 +2,7 @@
 
 - `undefined` and `error` can "return" any type
 - This is because they don't actually return anything but throw *language level* exceptions 
-- To use exceptions directly **import Control.Exception** 
+- To use exceptions directly __import Control.Exception__ 
 
 ~~~{.haskell}
 import Prelude hiding (catch) -- hiding prevents import of specific symbols 
@@ -42,21 +42,21 @@ Nothing
 catch :: (Exception e) => IO a -> (e -> IO a) -> IO a
 ~~~
 
-- It **executes** the given **action** first and if that throws an `Exception` then the handler is called
+- It __executes__ the given __action__ first and if that throws an `Exception` then the handler is called
 - The above `ghci` snippet captures this. 
 
 ####Some notes from the code above 
 - `DerivedDataTypeable` pragma used will be dicussed in a later lecture 
 - `Typeable` means run time type info for exceptions `(Discuss this with DM)` 
 - can create your own instance of Exception 
-- need to **specify the constructor explicitly** as shown ; `otherwise` it is a `compiler error`.
+- need to __specify the constructor explicitly__ as shown ; `otherwise` it is a `compiler error`.
 - `SomeException` is used to  _catch all exceptions_. 
 - Constructor pattern `e@(SomeException _)` catches all exceptions
 - type argument to SomeException has to be instance of type Exception 
 - `toException` and `fromException` two method on Exception typeclass. 
 - `toException` converts e to SomeException 
 - `fromException` returns either Nothing or Just _ 
-- take away message : use **@(SomeException _ ) to catch anything **
+- take away message : use __@(SomeException _ ) to catch anything __
 
 #Exceptions in Pure Code
 - can throw exceptions in `Pure` code but can only catch them in `IO`
@@ -84,18 +84,18 @@ Nothing
 
 ~~~
 *Main> pureCatcher (undefined:undefined :: String)
-Just "*** Exception: Prelude.undefined
+Just "__* Exception: Prelude.undefined
 ~~~
 
 - *Why does this happen*
-	+ ** catch only catches expceptions when thunks are evaluated**
-	+ ** Evaluating the list does not evaluate the head or tail **
+	+ __ catch only catches expceptions when thunks are evaluated__
+	+ __ Evaluating the list does not evaluate the head or tail __
 	+ Only the constructor `(:)` or `[]` is evaluated as shown below
 ~~~
 *Main> seq (undefined:undefined) ()
 ()
 ~~~
-- function called `deepseq`  in library of **same name** that _traverses an entire data structure_. evaluating it completely before returning the second argument, just like its namesake `seq` 
+- function called `deepseq`  in library of __same name__ that _traverses an entire data structure_. evaluating it completely before returning the second argument, just like its namesake `seq` 
 #### A Few More Exception Functions
 ~~~{.haskell}
 try :: Exception e => IO a -> IO (Either e a)
@@ -112,7 +112,7 @@ try :: Exception e => IO a -> IO (Either e a)
 	+ In the `Maybe Monad` _Nothing_ can be used to indicate _failure_ 
 
 #Haskell Threads  
-- Haskell provides **user-level** threads in `Control.Concurrent` 
+- Haskell provides __user-level__ threads in `Control.Concurrent` 
 - `forkIO` - creates new thread 
 - Threads are very lightweight, switching between threads does not require any intervention from the OS 
 - reading a socket does not put whole program to sleep just the  particular thread
@@ -148,7 +148,7 @@ timeout usec action = do
 
 # MVars
 - MVar = `M`utable `Var`iable
-- The **MVar type** lets threads communicate via `mutable shared variables`
+- The __MVar type__ lets threads communicate via `mutable shared variables`
 - `MVar t` is mutable var of `type t`. It is either _full_ of _empty_ 
 - MVar is like a channel of depth one ( Go analogy )
 - `tryTakeMVar` and `tryPutMVar` will return immediately ( Non-blocking).
@@ -183,7 +183,7 @@ pingpong v n = do
   parent n `finally` killThread tid
   when v $ putStrLn ""
 ~~~
-- We will benchmark Pingpong with [**criterion**.](http://hackage.haskell.org/package/criterion) A benchmarking lib written by Bryan
+- We will benchmark Pingpong with [__criterion__.](http://hackage.haskell.org/package/criterion) A benchmarking lib written by Bryan
 ~~~{.haskell}
 import Criterion.Main
 
@@ -196,7 +196,7 @@ main = defaultMain [
     where mybench = pingpong False 10000
 ~~~
 
-- **Takes 3.8ms for 20K thread switches ~190nsec/switch**
+- __Takes 3.8ms for 20K thread switches ~190nsec/switch__
 	+ Proof that haskell threads are lightweight 
 
 #OS Threads + Bound vs Unbound Threads 
@@ -206,7 +206,7 @@ forkOS :: IO () -> IO ThreadId
 ~~~
 
 - `forkOS` creates a Haskell thread _bound_ to a new OS thread 
-- When program is linked with **-threaded** initial thread is bound. 
+- When program is linked with __-threaded__ initial thread is bound. 
 
 ~~~
 $ ghc -threaded -O pingpong.hs 
@@ -217,21 +217,21 @@ mean: 121.1729 ms, lb 120.5601 ms, ub 121.7044 ms, ci 0.950
 ...
 ~~~
 
-- **Why is it so slow ??? ** 
-	+ Without **-threaded** all Haskell threads run in _one OS thread_ 
+- __Why is it so slow ??? __ 
+	+ Without __-threaded__ all Haskell threads run in _one OS thread_ 
 	+ In such a situation *switching between threads* is just a `function call`
-	+ With **-threaded** initial thread is _bound_
+	+ With __-threaded__ initial thread is _bound_
 	+ We ended up context switching linux thread and a haskell thread 
 	+ Therefore we were actually benchmarking Linux
 	+ Solve this by wrapping initial thread in `forkIO` to make it _unbounded_
-	+ Can do the wrapping yourself or use built in library function [**runInUnboundThread**](http://hackage.haskell.org/package/base-4.7.0.0/docs/Control-Concurrent.html#v:runInUnboundThread)
+	+ Can do the wrapping yourself or use built in library function [__runInUnboundThread__](http://hackage.haskell.org/package/base-4.7.0.0/docs/Control-Concurrent.html#v:runInUnboundThread)
 
 #### What Good are OS Threads 
 
-- If **unbound thread** blocks it can block **whole program** 
+- If __unbound thread__ blocks it can block __whole program__ 
 - FFI functions may expect to be called from same thread - so need bounded threads there. 
-- With _-threaded_ **GHC** ensures safe FFI calls run in separate OS thread. 
-- [**forkOn**](http://hackage.haskell.org/package/base-4.7.0.0/docs/Control-Concurrent.html#v:forkOn) lets you run on a specific CPU to run on - overriding the scheduler. 
+- With _-threaded_ __GHC__ ensures safe FFI calls run in separate OS thread. 
+- [__forkOn__](http://hackage.haskell.org/package/base-4.7.0.0/docs/Control-Concurrent.html#v:forkOn) lets you run on a specific CPU to run on - overriding the scheduler. 
 
 #Asynchronus Exceptions 
 
@@ -256,14 +256,14 @@ modifyMVar m action = do
 - _timeout_ function from few slides ago also suffers from the same problem  
 
 #Masking Exceptions
-- A solution to the above problem is to use [**mask**](http://hackage.haskell.org/package/base-4.7.0.0/docs/Control-Exception.html#v:mask) 
+- A solution to the above problem is to use [__mask__](http://hackage.haskell.org/package/base-4.7.0.0/docs/Control-Exception.html#v:mask) 
 
 ~~~
 mask :: ((forall a. IO a -> IO a) -> IO b) -> IO b 
 ~~~ 
 - ignore the `forall` for now. 
 - `mask` allows us to ignore _exceptions_ for a while 
-- Exceptions are **automatically unmasked** if the **thread sleeps** ( Eg: when blocked on a takeMVar)
+- Exceptions are __automatically unmasked__ if the __thread sleeps__ ( Eg: when blocked on a takeMVar)
 - Fixed code for `modifyMVar`
 
 ~~~{.haskell} 
@@ -293,7 +293,7 @@ wrap action = do
       loop
 ~~~
 
-- `forkIO` preserves the **current masked state.** 
+- `forkIO` preserves the __current masked state.__ 
 - Therefore we can use _unmask_ in a child thread ( as above)
 - new child thread starts of in the masked state
 - unmask exceptions during the  execution of an action
@@ -301,7 +301,7 @@ wrap action = do
 		if we get it back then its fine, repeat until takeMvar succeeds
 
 #The Bracket Function
-- `mask` is tricky but [**bracket**](http://hackage.haskell.org/package/base-4.7.0.0/docs/Control-Exception.html#v:bracket) makes it easy to use. 
+- `mask` is tricky but [__bracket__](http://hackage.haskell.org/package/base-4.7.0.0/docs/Control-Exception.html#v:bracket) makes it easy to use. 
 ~~~{.haskell} 
 bracket :: IO a -> (a -> IO b) -> (a -> IO c) -> IO c  
 ~~~  
@@ -318,7 +318,7 @@ bracket (openFile "/etc/mtab" ReadMode) -- first
         hClose                          -- last
         (\h -> hGetContents h >>= doit) -- main
 ~~~
-- No matter what happens ( synchornus or asynchronus exceptions ) we are `guaranteed` to **close the file handle**.
+- No matter what happens ( synchornus or asynchronus exceptions ) we are `guaranteed` to __close the file handle__.
 - Source code for bracket (from hoogle)
 ~~~{.haskell} 
  bracket
@@ -343,7 +343,7 @@ bracket (openFile "/etc/mtab" ReadMode) -- first
 	+ Why? 
 		* If we switched the order around(i:e `empty = locked` and `full = unlocked`) then any thread can unlock and not just the one that acquired the lock. 
 
-Code for Mutex using **MVars**
+Code for Mutex using __MVars__
 ~~~{.haskell} 
 type Mutex = MVar ThreadId
 
@@ -361,8 +361,8 @@ mutex_unlock mv = do mytid <- myThreadId
 ~~~
 
 
-- Putting **MVars inside MVars** is a very powerful idea. 
-	+ Can be used to implement a [**Condition Variable**](http://www.scs.stanford.edu/14sp-cs240h/slides/concurrency-slides.html#(26))
+- Putting __MVars inside MVars__ is a very powerful idea. 
+	+ Can be used to implement a [__Condition Variable__](http://www.scs.stanford.edu/14sp-cs240h/slides/concurrency-slides.html#(26))
 
 ####Channels using MVar 
 - Nesting MVar's can also be used to implement Channels 
@@ -370,7 +370,7 @@ mutex_unlock mv = do mytid <- myThreadId
 	+ one mVar points to head of the list for readers 
 	+ one points for the end of the list for writers 
 	+ Essentially a linked list of MVars 
-	+ Helpful [**Figure**](http://www.scs.stanford.edu/14sp-cs240h/slides/concurrency-slides.html#(27)) for visualization 
+	+ Helpful [__Figure__](http://www.scs.stanford.edu/14sp-cs240h/slides/concurrency-slides.html#(27)) for visualization 
 
 ~~~{.haskell} 
 data Item a = Item a (Stream a)
@@ -399,7 +399,7 @@ readChan (Chan r _) =
 ~~~
 
 - The above is a simplified implementation 
-- [**Control.Concurrent.Chan**](http://hackage.haskell.org/package/base-4.7.0.0/docs/Control-Concurrent-Chan.html) provides *unbounded* Channels
+- [__Control.Concurrent.Chan__](http://hackage.haskell.org/package/base-4.7.0.0/docs/Control-Concurrent-Chan.html) provides *unbounded* Channels
 
 #Networking 
 ~~~{.haskell} 
@@ -410,11 +410,11 @@ sClose :: Socket -> IO ()
 hClose :: Handle -> IO ()
 ~~~
 
-Support for high-level stream (`TCP` and `Unix-domain`)socket support in [**Network**](http://hackage.haskell.org/package/network-2.5.0.0/docs/Network.html)
+Support for high-level stream (`TCP` and `Unix-domain`)socket support in [__Network__](http://hackage.haskell.org/package/network-2.5.0.0/docs/Network.html)
 
 #### Example 
 
-**Build a program that plays two users against one another and exits after one game**
+__Build a program that plays two users against one another and exits after one game__
 
 ~~~{.haskell} 
 play :: MVar Move -> MVar Move
@@ -444,12 +444,12 @@ netrock listenPort =
 
 + Store the moves for both the players in MVars 
 + Spin of an unbounded thread to handle the incoming connection for `player 1`
-+ We use the `wait` **MVar** to synchronise between the parent thread and the child thread. 
++ We use the `wait` __MVar__ to synchronise between the parent thread and the child thread. 
 	- If the parent thread executes first then the program blocks on `takeMVar wait` until the child thread finishes execution and runs `putMVar wait ()` 
 + `play` is called once from each thread. If `player1` calls `play` then it __fills__ its MVar and __empties__ the other players ( `player 2` in this case) . 
 	+ The use of blocking `takeMVar` helps in synchronising between the two players. 
 
-#### Low Level BSD Socket Support in [**Network.Socket**](http://hackage.haskell.org/package/network-2.5.0.0/docs/Network-Socket.html)
+#### Low Level BSD Socket Support in [__Network.Socket__](http://hackage.haskell.org/package/network-2.5.0.0/docs/Network-Socket.html)
 
 ~~~{.haskell} 
 socket :: Family -> SocketType -> ProtocolNumber -> IO Socket
@@ -462,7 +462,7 @@ getAddrInfo :: Maybe AddrInfo
             -> IO [AddrInfo]
 ~~~
 
-+ [**netcat Example**](http://www.scs.stanford.edu/14sp-cs240h/slides/concurrency-slides.html#(34))
++ [__netcat Example__](http://www.scs.stanford.edu/14sp-cs240h/slides/concurrency-slides.html#(34))
 
 
 
