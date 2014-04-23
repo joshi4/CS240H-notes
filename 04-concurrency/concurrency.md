@@ -56,7 +56,7 @@ catch :: (Exception e) => IO a -> (e -> IO a) -> IO a
 - `toException` and `fromException` two method on Exception typeclass. 
 - `toException` converts e to SomeException 
 - `fromException` returns either Nothing or Just _ 
-- take away message : use __@(SomeException _ ) to catch anything __
+- take away message : use __@(SomeException _ ) to catch anything__
 
 #Exceptions in Pure Code
 - can throw exceptions in `Pure` code but can only catch them in `IO`
@@ -84,12 +84,12 @@ Nothing
 
 ~~~
 *Main> pureCatcher (undefined:undefined :: String)
-Just "__* Exception: Prelude.undefined
+Just "*** Exception: Prelude.undefined
 ~~~
 
 - *Why does this happen*
-	+ __ catch only catches expceptions when thunks are evaluated__
-	+ __ Evaluating the list does not evaluate the head or tail __
+	+ __catch only catches expceptions when thunks are evaluated__
+	+ __Evaluating the list does not evaluate the head or tail__
 	+ Only the constructor `(:)` or `[]` is evaluated as shown below
 ~~~
 *Main> seq (undefined:undefined) ()
@@ -217,7 +217,7 @@ mean: 121.1729 ms, lb 120.5601 ms, ub 121.7044 ms, ci 0.950
 ...
 ~~~
 
-- __Why is it so slow ??? __ 
+- __Why is it so slow ???__ 
 	+ Without __-threaded__ all Haskell threads run in _one OS thread_ 
 	+ In such a situation *switching between threads* is just a `function call`
 	+ With __-threaded__ initial thread is _bound_
