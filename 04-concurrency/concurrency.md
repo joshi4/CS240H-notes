@@ -1,3 +1,4 @@
+% Concurrency Notes - Shantanu Joshi
 #Exceptions 
 
 - `undefined` and `error` can "return" any type
@@ -47,7 +48,7 @@ catch :: (Exception e) => IO a -> (e -> IO a) -> IO a
 
 ####Some notes from the code above 
 - `DerivedDataTypeable` pragma used will be dicussed in a later lecture 
-- `Typeable` means run time type info for exceptions `(Discuss this with DM)` 
+- `Typeable` means run time type info for exceptions. This will be discussed in more detail later in the course
 - can create your own instance of Exception 
 - need to __specify the constructor explicitly__ as shown ; `otherwise` it is a `compiler error`.
 - `SomeException` is used to  _catch all exceptions_. 
